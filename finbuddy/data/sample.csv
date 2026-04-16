@@ -1,0 +1,38 @@
+Date,Category,Amount,Type
+2024-01-01,Salary,50000,Income
+2024-01-03,Food Delivery,450,Expense
+2024-01-05,Groceries,2200,Expense
+2024-01-07,Entertainment,800,Expense
+2024-01-10,Shopping,3500,Expense
+2024-01-12,Transport,600,Expense
+2024-01-15,Food Delivery,350,Expense
+2024-01-18,Utilities,1200,Expense
+2024-01-20,Food Delivery,520,Expense
+2024-01-22,Shopping,1800,Expense
+2024-01-25,Entertainment,1200,Expense
+2024-01-28,Groceries,1800,Expense
+2024-01-30,Freelance,8000,Income
+2024-02-01,Salary,50000,Income
+2024-02-03,Food Delivery,680,Expense
+2024-02-05,Groceries,2500,Expense
+2024-02-08,Entertainment,600,Expense
+2024-02-10,Shopping,4200,Expense
+2024-02-12,Transport,750,Expense
+2024-02-15,Food Delivery,420,Expense
+2024-02-18,Utilities,1200,Expense
+2024-02-20,Food Delivery,380,Expense
+2024-02-22,Shopping,2100,Expense
+2024-02-25,Entertainment,900,Expense
+2024-02-28,Groceries,1600,Expense
+2024-03-01,Salary,50000,Income
+2024-03-03,Food Delivery,290,Expense
+2024-03-05,Groceries,2000,Expense
+2024-03-07,Entertainment,400,Expense
+2024-03-10,Shopping,1500,Expense
+2024-03-12,Transport,500,Expense
+2024-03-15,Food Delivery,310,Expense
+2024-03-18,Utilities,1200,Expense
+2024-03-20,Investment,5000,Income
+2024-03-22,Shopping,800,Expense
+2024-03-25,Entertainment,600,Expense
+2024-03-28,Groceries,1900,Expense
