@@ -33,13 +33,30 @@ class DashboardScreen(tk.Frame):
         make_separator(self).pack(fill="x", padx=theme.PAD_XL, pady=4)
 
         # Scrollable content
-        scroll_canvas = tk.Canvas(self, bg=theme.BG_DARK, highlightthickness=0)
-        scroll_canvas.pack(fill="both", expand=True)
+        container = tk.Frame(self, bg=theme.BG_DARK)
+        container.pack(fill="both", expand=True)
+
+        scrollbar = tk.Scrollbar(container, orient="vertical")
+        scrollbar.pack(side="right", fill="y")
+
+        scroll_canvas = tk.Canvas(container, bg=theme.BG_DARK, highlightthickness=0,
+                                  yscrollcommand=scrollbar.set)
+        scroll_canvas.pack(side="left", fill="both", expand=True)
+        
+        scrollbar.config(command=scroll_canvas.yview)
+
         content = tk.Frame(scroll_canvas, bg=theme.BG_DARK)
         scroll_canvas.create_window((0, 0), window=content, anchor="nw")
 
         content.bind("<Configure>", lambda e: scroll_canvas.configure(
             scrollregion=scroll_canvas.bbox("all")))
+
+        # Mousewheel support (only when mouse is over canvas)
+        def _on_mousewheel(event):
+            scroll_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+        scroll_canvas.bind('<Enter>', lambda e: scroll_canvas.bind_all("<MouseWheel>", _on_mousewheel))
+        scroll_canvas.bind('<Leave>', lambda e: scroll_canvas.unbind_all("<MouseWheel>"))
 
         # ─── Top Stats Row ────────────────────────────────────────────────
         stats_row = tk.Frame(content, bg=theme.BG_DARK)

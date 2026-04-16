@@ -51,15 +51,33 @@ class AnalysisScreen(tk.Frame):
         self._status_label.pack(padx=theme.PAD_LG, pady=theme.PAD_MD, anchor="w")
 
         # Scrollable content area
-        self._scroll_canvas = tk.Canvas(self, bg=theme.BG_DARK, highlightthickness=0)
-        self._scroll_canvas.pack(fill="both", expand=True)
+        container = tk.Frame(self, bg=theme.BG_DARK)
+        container.pack(fill="both", expand=True)
+
+        scrollbar = tk.Scrollbar(container, orient="vertical")
+        scrollbar.pack(side="right", fill="y")
+
+        self._scroll_canvas = tk.Canvas(container, bg=theme.BG_DARK, highlightthickness=0,
+                                        yscrollcommand=scrollbar.set)
+        self._scroll_canvas.pack(side="left", fill="both", expand=True)
+        
+        scrollbar.config(command=self._scroll_canvas.yview)
+
         self._content = tk.Frame(self._scroll_canvas, bg=theme.BG_DARK)
         self._content_id = self._scroll_canvas.create_window(
             (0, 0), window=self._content, anchor="nw")
+
         self._content.bind("<Configure>", lambda e: self._scroll_canvas.configure(
             scrollregion=self._scroll_canvas.bbox("all")))
         self._scroll_canvas.bind("<Configure>", lambda e: self._scroll_canvas.itemconfig(
             self._content_id, width=e.width))
+
+        # Mousewheel support (only when mouse is over canvas)
+        def _on_mousewheel(event):
+            self._scroll_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+        self._scroll_canvas.bind('<Enter>', lambda e: self._scroll_canvas.bind_all("<MouseWheel>", _on_mousewheel))
+        self._scroll_canvas.bind('<Leave>', lambda e: self._scroll_canvas.unbind_all("<MouseWheel>"))
 
         # Initial empty state
         self._show_empty_state()
@@ -87,7 +105,7 @@ class AnalysisScreen(tk.Frame):
         )
         if not path:
             return
-        self._status_label.config(text=f"⏳ Loading: {path}", fg=TEXT_MUTED)
+        self._status_label.config(text=f"⏳ Loading: {path}", fg=theme.TEXT_MUTED)
         self.update_idletasks()
         threading.Thread(target=self._load_file, args=(path,), daemon=True).start()
 
@@ -101,7 +119,7 @@ class AnalysisScreen(tk.Frame):
 
     def _on_load_error(self, error: str):
         self._status_label.config(
-            text=f"❌ Error: {error}", fg=DANGER)
+            text=f"❌ Error: {error}", fg=theme.DANGER)
         messagebox.showerror("CSV Error", error)
 
     def _on_load_success(self, path: str, df, summary: dict):
@@ -115,7 +133,7 @@ class AnalysisScreen(tk.Frame):
             text=f"✅  Loaded: {fname}  |  {len(df)} transactions  |  "
                  f"₹{summary['total_income']:,.0f} income  |  "
                  f"₹{summary['total_expense']:,.0f} expenses",
-            fg=SUCCESS
+            fg=theme.SUCCESS
         )
 
         if self.on_data_loaded:
@@ -343,13 +361,13 @@ class AnalysisScreen(tk.Frame):
                 if self.on_data_loaded:
                     self.on_data_loaded(summary)
                 
-                self._status_label.config(text=f"✅ Added {data['Type']}: {data['Category']} (₹{data['Amount']:,.0f})", fg=SUCCESS)
+                self._status_label.config(text=f"✅ Added {data['Type']}: {data['Category']} (₹{data['Amount']:,.0f})", fg=theme.SUCCESS)
                 self._render_analysis(summary)
                 modal.destroy()
             except Exception as e:
                 messagebox.showerror("Input Error", f"Invalid input: {e}")
 
-        make_button(modal, "Save Transaction", _save, variant="primary").pack(pady=PAD_XL)
+        make_button(modal, "Save Transaction", _save, variant="primary").pack(pady=theme.PAD_XL)
 
     def _run_ai_analysis(self):
         """Call Groq API to get personalized insights."""
@@ -396,7 +414,7 @@ class AnalysisScreen(tk.Frame):
                 if error:
                     box.insert("1.0", f"❌ Error: {response}")
                     box.tag_add("err", "1.0", "end")
-                    box.tag_config("err", foreground=DANGER)
+                    box.tag_config("err", foreground=theme.DANGER)
                 else:
                     box.insert("1.0", response)
                 box.config(state="disabled")
@@ -404,7 +422,7 @@ class AnalysisScreen(tk.Frame):
             self.after(0, _update_ui)
 
         threading.Thread(target=_fetch, daemon=True).start()
-        make_button(content, "Got it, Buddy! 💜", modal.destroy, variant="ghost").pack(pady=PAD_LG)
+        make_button(content, "Got it, Buddy! 💜", modal.destroy, variant="ghost").pack(pady=theme.PAD_LG)
 
     def refresh(self):
         """Re-render if data already loaded."""

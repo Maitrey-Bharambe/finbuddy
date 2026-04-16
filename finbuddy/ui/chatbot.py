@@ -67,9 +67,12 @@ class ChatbotScreen(tk.Frame):
         msg_canvas.pack(side="left", fill="both", expand=True)
         self._msg_canvas = msg_canvas
 
-        # Bind mousewheel
-        msg_canvas.bind_all("<MouseWheel>", lambda e: msg_canvas.yview_scroll(
-            int(-1 * (e.delta / 120)), "units"))
+        # Mousewheel support (only when mouse is over canvas)
+        def _on_mousewheel(event):
+            msg_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+        msg_canvas.bind('<Enter>', lambda e: msg_canvas.bind_all("<MouseWheel>", _on_mousewheel))
+        msg_canvas.bind('<Leave>', lambda e: msg_canvas.unbind_all("<MouseWheel>"))
 
         # ─── Welcome message ──────────────────────────────────────────────
         self._add_bot_message(
@@ -115,9 +118,9 @@ class ChatbotScreen(tk.Frame):
 
         self._send_btn = make_button(inner, "Send →", self._send_message,
                                      variant="primary")
-        self._send_btn.pack(side="right", padx=PAD_MD)
+        self._send_btn.pack(side="right", padx=theme.PAD_MD)
 
-        make_separator(self).pack(fill="x", padx=PAD_XL, pady=(0, 4))
+        make_separator(self).pack(fill="x", padx=theme.PAD_XL, pady=(0, 4))
 
     def _on_input_focus(self, event):
         if self._input_box.get() == "Ask FinBuddy anything...":
@@ -132,7 +135,7 @@ class ChatbotScreen(tk.Frame):
     def _quick_send(self, text: str):
         self._input_box.delete(0, "end")
         self._input_box.insert(0, text)
-        self._input_box.config(fg=TEXT_PRIMARY)
+        self._input_box.config(fg=theme.TEXT_PRIMARY)
         self._send_message()
 
     def _send_message(self):

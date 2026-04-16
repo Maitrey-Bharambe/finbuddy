@@ -27,13 +27,31 @@ class FaltuMeterScreen(tk.Frame):
         make_separator(self).pack(fill="x", padx=theme.PAD_XL, pady=4)
 
         # Scrollable
-        canvas = tk.Canvas(self, bg=theme.BG_DARK, highlightthickness=0)
-        canvas.pack(fill="both", expand=True)
+        container = tk.Frame(self, bg=theme.BG_DARK)
+        container.pack(fill="both", expand=True)
+
+        scrollbar = tk.Scrollbar(container, orient="vertical")
+        scrollbar.pack(side="right", fill="y")
+
+        canvas = tk.Canvas(container, bg=theme.BG_DARK, highlightthickness=0,
+                           yscrollcommand=scrollbar.set)
+        canvas.pack(side="left", fill="both", expand=True)
+        
+        scrollbar.config(command=canvas.yview)
+
         content = tk.Frame(canvas, bg=theme.BG_DARK)
         cid = canvas.create_window((0, 0), window=content, anchor="nw")
+        
         content.bind("<Configure>", lambda e: canvas.configure(
             scrollregion=canvas.bbox("all")))
         canvas.bind("<Configure>", lambda e: canvas.itemconfig(cid, width=e.width))
+
+        # Mousewheel support (only when mouse is over canvas)
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+        canvas.bind('<Enter>', lambda e: canvas.bind_all("<MouseWheel>", _on_mousewheel))
+        canvas.bind('<Leave>', lambda e: canvas.unbind_all("<MouseWheel>"))
 
         # Score card
         score_card = make_card(content)
@@ -104,7 +122,7 @@ class FaltuMeterScreen(tk.Frame):
             "No data loaded yet.",
             style="muted"
         )
-        self._no_breakdown_label.pack(pady=PAD_XL)
+        self._no_breakdown_label.pack(pady=theme.PAD_XL)
 
         # Tips card
         tips_card = make_card(content)
@@ -165,7 +183,7 @@ class FaltuMeterScreen(tk.Frame):
                                      summary["total_expense"])
 
         score = result["score"]
-        color = result.get("color", PURPLE_LIGHT)
+        color = result.get("color", theme.PURPLE_LIGHT)
 
         # Animate ring and bar
         self._draw_score_ring(score, color)
@@ -173,7 +191,7 @@ class FaltuMeterScreen(tk.Frame):
         self._score_bar.animate_to(score)
 
         self._verdict_label.config(text=result["verdict"], fg=color)
-        self._message_label.config(text=result["message"], fg=TEXT_PRIMARY)
+        self._message_label.config(text=result["message"], fg=theme.TEXT_PRIMARY)
         self._faltu_amount_label.config(text=f"₹{result['faltu_amount']:,.0f}")
         self._faltu_pct_label.config(
             text=f"{result['faltu_percent']:.1f}% of total spending")
